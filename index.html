@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Файл илгээх портал</title>
+</head>
+<body>
+  <h2>Санхүүгийн аудитын файл uplаoad</h2>
+  <input type="file" id="fileInput" />
+  <button onclick="uploadFile()">Файл илгээх</button>
+  <p id="status"></p>
+
+<script>
+async function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    if (!file) {
+      alert('Файлаа сонгоно уу!');
+      return;
+    }
+
+    document.getElementById('status').innerText = 'Илгээж байна...';
+
+    const blobSasUrl = 'https://mfilestoragee.blob.core.windows.net/audit-files';
+    const sasToken = '?sp=rcw&st=2025-07-02T10:29:09Z&se=2026-04-01T18:29:09Z&sv=2024-11-04&sr=c&sig=SLItxmHXKwtD8kzLlM06mTYFh5Ua7gSC0ZFkN0axdRg%3D';
+
+    const uploadUrl = blobSasUrl + '/' + encodeURIComponent(file.name) + sasToken;
+
+    try {
+      const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'x-ms-blob-type': 'BlockBlob'
+        },
+        body: file
+      });
+
+      if (response.ok) {
+        document.getElementById('status').innerText = 'Файл амжилттай илгээгдлээ!';
+      } else {
+        document.getElementById('status').innerText = 'Алдаа гарлаа: ' + response.status + ' - ' + response.statusText;
+      }
+    } catch (error) {
+      document.getElementById('status').innerText = 'Fetch алдаа гарлаа: ' + error.message;
+    }
+}
+</script>
+</body>
+</html>
